@@ -41,6 +41,7 @@ public class TableExample {
 	    
 	    System.out.println("Rows in the second table:" + rows.size());
 	    
+	    //testcase to check if "First Name" is displayed in the first row first col of the second table in the dom
 	    WebElement firstColumn=driver.findElement(By.xpath("/html/body/table[2]/tbody/tr[1]/th[1]"));
 	    
 	    String ExpectedTextInFirstColumn = "First name";
