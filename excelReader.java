@@ -1,15 +1,21 @@
 package basic;
 
 
-	import java.io.FileInputStream;
+	import java.io.File;
+import java.io.FileInputStream;
 	import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 	import org.apache.poi.xssf.usermodel.XSSFSheet;
 	import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -21,8 +27,8 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 		static XSSFCell s_username;
 		static XSSFCell s_password;
 	    static WebDriver driver;	
-		
-		public static void main (String [] args) throws IOException, InterruptedException{
+	    static String loginFailedFilename;
+		public static void main (String [] args) throws Exception{
 			String exePath = "d://chromedriver.exe";
 			System.setProperty("webdriver.chrome.driver", exePath);
 			
@@ -58,9 +64,9 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 		
 		
 		//user defined method
-		static void doLogin(XSSFCell p_username,XSSFCell p_password) throws InterruptedException
+		static void doLogin(XSSFCell p_username,XSSFCell p_password) throws Exception
 		{
-			
+			String dttime;
 			System.out.println("username is:" + p_username + " password is : " + p_password);
 					
 			//open the browser 
@@ -78,7 +84,8 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 		    
 		    
 		    //See if successfully logged in
-		    
+		    String flashMsg = driver.findElement(By.id("flash")).getText();
+	    	
 		    try {
 		    	driver.findElement(By.xpath("//*[contains(text(),'Welcome')]"));
 		    	
@@ -88,7 +95,24 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 		    }
 		    catch(NoSuchElementException e)
 		    {
-		    	System.out.println("***Login unsuccessful for username:" + p1 + " and Password:" + p2);
+		    
+		    	//Take screenshot on unsuccessful login 
+		    
+		    	System.out.println( flashMsg + p1 + " and Password:" + p2);
+		    	
+		    	
+		    	 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM_dd_yy_"
+		          		+ "HH:mm:ss");  
+		        
+		    	LocalDateTime now = LocalDateTime.now();
+		    	
+		        dttime = dtf.format(now);
+		        		        
+		        System.out.println(dtf.format(now));  
+		 
+		    	loginFailedFilename = "d://infy//" + p1 + "_" + p2 + "_" + dttime+ ".png";
+		    	takePicture(driver, loginFailedFilename);
+		    
 		    }
 		    
 		    
@@ -98,6 +122,31 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 			driver.navigate().to("https://the-internet.herokuapp.com/login");
 			
 		}
+		
+		/**
+	     * This function will take screenshot
+	     * @param webdriver
+	     * @param fileWithPath
+	     * @throws Exception     *      */
+	    public static void takePicture(WebDriver webdriver,String fileWithPath) throws Exception{
+	    	
+	        //Convert web driver object to TakeScreenshot - Similar to user pressing PrtScrn button
+	        TakesScreenshot scrShot =((TakesScreenshot)webdriver);
+	
+	        //Call getScreenshotAs method to create image file - similar to the clipboard contents
+	        
+	        File SrcFile=scrShot.getScreenshotAs(OutputType.FILE);
+	        
+	        //Move image file to new destination - Similar to saving the file as .png or .bmp  or .jpeg file format
+	         File DestFile=new File(fileWithPath); 
+	         
+	      //Copy file at destination - Similar to saving the contents of clipboard to the filename  in the disk
+	        FileUtils.copyFile(SrcFile, DestFile);
+	    }
+
+		
+		
+		
 		
 		
 	}
